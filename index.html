@@ -46,6 +46,74 @@
               </label>
             </fieldset>
 
+            <fieldset id="fieldset-design" style="display:none">
+              <legend>デザイン指示書設定</legend>
+
+              <label>
+                制作対象
+                <input id="designTarget" name="designTarget" type="text" placeholder="例：LP、Webサイト、バナー、UI、パンフレット" />
+              </label>
+
+              <label>
+                ターゲットユーザー
+                <input id="designAudience" name="designAudience" type="text" placeholder="例：30代女性、BtoB企業担当者、初めて見る人" />
+              </label>
+
+              <label>
+                ブランドトーン
+                <select id="designTone" name="designTone">
+                  <option value="高級感・信頼感">高級感・信頼感</option>
+                  <option value="モダン・スタイリッシュ">モダン・スタイリッシュ</option>
+                  <option value="ミニマル・シンプル">ミニマル・シンプル</option>
+                  <option value="テック感・先進的">テック感・先進的</option>
+                  <option value="ポップ・フレンドリー">ポップ・フレンドリー</option>
+                  <option value="温かみ・親しみやすさ">温かみ・親しみやすさ</option>
+                  <option value="プロフェッショナル・堅実">プロフェッショナル・堅実</option>
+                </select>
+              </label>
+
+              <label>
+                参考サイト・URL（任意）
+                <input id="designRef" name="designRef" type="text" placeholder="例：https://example.com、競合Aサイト" />
+              </label>
+
+              <label>
+                NG表現・避けたい方向性（任意）
+                <input id="designNg" name="designNg" type="text" placeholder="例：古くさい印象、過剰な装飾、暗い配色" />
+              </label>
+            </fieldset>
+
+            <fieldset id="fieldset-research" style="display:none">
+              <legend>リサーチ・競合分析設定</legend>
+
+              <label>
+                調査テーマ
+                <input id="researchTheme" name="researchTheme" type="text" placeholder="例：SaaS市場、採用サービス、AIツール、EC業界" />
+              </label>
+
+              <label>
+                調査目的
+                <select id="researchPurpose" name="researchPurpose">
+                  <option value="競合比較">競合比較</option>
+                  <option value="新規事業の検討">新規事業の検討</option>
+                  <option value="提案書・企画書作成">提案書・企画書作成</option>
+                  <option value="UI/UX研究">UI/UX研究</option>
+                  <option value="投資・意思決定判断">投資・意思決定判断</option>
+                  <option value="市場全体の把握">市場全体の把握</option>
+                </select>
+              </label>
+
+              <label>
+                対象企業・URL（任意）
+                <textarea id="researchTargets" name="researchTargets" rows="3" placeholder="例：A社（https://...）、B社、C社"></textarea>
+              </label>
+
+              <label>
+                特に見たい観点（任意）
+                <input id="researchFocus" name="researchFocus" type="text" placeholder="例：価格、UX、SEO、集客、機能比較" />
+              </label>
+            </fieldset>
+
             <fieldset id="fieldset-uireview" style="display:none">
               <legend>UI/UXレビュー設定</legend>
 
@@ -73,11 +141,6 @@
               <label>
                 改善したいこと（任意）
                 <textarea id="uiGoal" name="uiGoal" rows="2" placeholder="例：CVRを上げたい、離脱率を下げたい、信頼感を出したい"></textarea>
-              </label>
-
-              <label>
-                補足（任意）
-                <textarea id="uiNotes" name="uiNotes" rows="2" placeholder="例：スマホ表示で見てほしい、競合と比べて弱い部分を知りたい"></textarea>
               </label>
             </fieldset>
 

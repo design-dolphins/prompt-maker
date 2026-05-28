@@ -41,7 +41,15 @@ const fields = {
   uiPageType: document.querySelector("#uiPageType"),
   uiTarget: document.querySelector("#uiTarget"),
   uiGoal: document.querySelector("#uiGoal"),
-  uiNotes: document.querySelector("#uiNotes"),
+  designTarget: document.querySelector("#designTarget"),
+  designAudience: document.querySelector("#designAudience"),
+  designTone: document.querySelector("#designTone"),
+  designRef: document.querySelector("#designRef"),
+  designNg: document.querySelector("#designNg"),
+  researchTheme: document.querySelector("#researchTheme"),
+  researchPurpose: document.querySelector("#researchPurpose"),
+  researchTargets: document.querySelector("#researchTargets"),
+  researchFocus: document.querySelector("#researchFocus"),
 };
 
 const modeLabels = {
@@ -77,11 +85,11 @@ const exampleRequests = {
   wireframe: "",
   policy: "育児休暇制度の改定内容を整理して社員向けに共有したい",
   "ui-review": "",
-  "design-direction": "コーポレートサイトリニューアルのデザイン方針をまとめたい",
+  "design-direction": "",
   email: "納期延期をクライアントに丁重にお願いするメールを書きたい",
   minutes: "プロジェクトキックオフ会議の議事録を整理したい",
   brainstorm: "新サービスのネーミングアイデアを出したい",
-  research: "国内の競合3社のサービス内容を比較したい",
+  research: "",
   custom: "",
   illust: "東京の下町",
 };
@@ -392,6 +400,79 @@ const defaults = {
   includeSummary: true,
 };
 
+function buildDesignPrompt(state) {
+  const opt = (label, val) => (val || "").trim() ? `- ${label}：${val.trim()}` : null;
+  const infoLines = [
+    opt("制作対象", state.designTarget),
+    opt("ターゲットユーザー", state.designAudience),
+    `- ブランドトーン：${state.designTone || "モダン・スタイリッシュ"}`,
+    opt("参考サイト・URL", state.designRef),
+    opt("NG表現・避けたい方向性", state.designNg),
+    opt("補足", state.request),
+  ].filter(Boolean);
+
+  return [
+    "あなたは「クリエイティブディレクター兼デザイン戦略AI」です。",
+    "以下の情報をもとに、デザイン制作チームへ共有できるデザインディレクション指示書を作成してください。",
+    "",
+    "# 【制作情報】",
+    ...infoLines,
+    "",
+    "# 【制約条件】",
+    "- デザイン抽象論ではなく制作指示レベルまで具体化する",
+    "- UI/レイアウト/余白/タイポ/配色/写真トーンまで言語化する",
+    "- 「なぜその方向性なのか」も説明する",
+    "- ターゲット視点での印象設計を行う",
+    "- 必要に応じてA/B方向性を提示する",
+    "- デザインレビュー時の評価軸も定義する",
+    "",
+    "# 【出力形式】",
+    "1. デザイン戦略サマリー",
+    "2. ターゲット印象設計（感じさせたいこと／避けるべき印象）",
+    "3. トーン＆マナー定義（配色／タイポ／写真トーン／余白方針）",
+    "4. 画面・クリエイティブ構成方針（FV・CTA・情報優先順位）",
+    "5. デザインレビュー基準（良い状態／NG状態のチェックリスト）",
+    "6. 制作チーム向けディレクションメモ",
+    "",
+    "以上の内容を確認しました。それでは今すぐ作業を開始してください。",
+  ].join("\n");
+}
+
+function buildResearchPrompt(state) {
+  const opt = (label, val) => (val || "").trim() ? `- ${label}：${val.trim()}` : null;
+  const infoLines = [
+    opt("調査テーマ", state.researchTheme),
+    `- 調査目的：${state.researchPurpose || "競合比較"}`,
+    opt("対象企業・URL", state.researchTargets),
+    opt("特に見たい観点", state.researchFocus),
+    opt("補足", state.request),
+  ].filter(Boolean);
+
+  return [
+    "あなたは「市場分析コンサルタント兼リサーチAI」です。",
+    "以下の情報をもとに、実務で意思決定に使えるレベルの調査・比較・示唆抽出を行ってください。",
+    "",
+    "# 【調査情報】",
+    ...infoLines,
+    "",
+    "# 【制約条件】",
+    "- 単なる情報列挙ではなく「示唆」を含める",
+    "- 比較可能な形で整理する",
+    "- 事実と推測を分離する",
+    "- 競合優位性・弱点を両面で整理する",
+    "- 情報不足時は合理的推定を行い、推定である旨を明記する",
+    "",
+    "# 【出力形式】",
+    "1. 調査サマリー（市場全体感・重要示唆）",
+    "2. 競合比較一覧（強み・弱み・差別化要素・推定ポジション）",
+    "3. ユーザー観点分析（ニーズ・不満・選定理由）",
+    "4. 戦略示唆（攻めるべきポイント・差別化余地・勝ち筋仮説）",
+    "5. 今後追加で調査すべき論点",
+    "",
+    "以上の内容を確認しました。それでは今すぐ作業を開始してください。",
+  ].join("\n");
+}
+
 function buildUiReviewPrompt(state) {
   const perspectiveLabels = {
     overall: "UI/UX総合",
@@ -410,8 +491,7 @@ function buildUiReviewPrompt(state) {
   if (state.uiPageType) lines.push(`# ページの種類：${state.uiPageType}`);
   if (state.uiTarget) lines.push(`# ターゲットユーザー：${state.uiTarget}`);
   if ((state.uiGoal || "").trim()) lines.push(`# 改善したいこと：${state.uiGoal.trim()}`);
-  if ((state.uiNotes || "").trim()) lines.push(`# 補足：${state.uiNotes.trim()}`);
-  if ((state.request || "").trim()) lines.push(`# その他：${state.request.trim()}`);
+  if ((state.request || "").trim()) lines.push(`# 補足：${state.request.trim()}`);
 
   lines.push(
     "",
@@ -582,7 +662,11 @@ function updateIllustVisibility(mode) {
   const isWireframe = mode === "wireframe";
   const isProposal = mode === "proposal";
   const isUiReview = mode === "ui-review";
-  const hideStandard = isIllust || isWireframe || isProposal || isUiReview;
+  const isDesign = mode === "design-direction";
+  const isResearch = mode === "research";
+  const hideStandard = isIllust || isWireframe || isProposal || isUiReview || isDesign || isResearch;
+  document.querySelector("#fieldset-design").style.display = isDesign ? "" : "none";
+  document.querySelector("#fieldset-research").style.display = isResearch ? "" : "none";
   document.querySelector("#fieldset-uireview").style.display = isUiReview ? "" : "none";
   document.querySelector("#fieldset-proposal").style.display = isProposal ? "" : "none";
   document.querySelector("#fieldset-wireframe").style.display = isWireframe ? "" : "none";
@@ -604,6 +688,12 @@ function updateIllustVisibility(mode) {
   } else if (isUiReview) {
     requestLegend.textContent = "補足・その他（任意）";
     requestTextarea.placeholder = "例：スマホ表示で見てほしい、競合と比べて弱い部分を知りたい";
+  } else if (isDesign) {
+    requestLegend.textContent = "補足・その他（任意）";
+    requestTextarea.placeholder = "例：制作チームに外注予定、A/B案もほしい";
+  } else if (isResearch) {
+    requestLegend.textContent = "補足・その他（任意）";
+    requestTextarea.placeholder = "例：経営会議向けにまとめたい、SEO観点も含めてほしい";
   } else {
     requestLegend.textContent = "依頼内容";
     requestTextarea.placeholder = "ここに相談内容・タスクの詳細を入力してください";
@@ -686,6 +776,8 @@ function buildPrompt(state) {
   if (state.mode === "illust") return buildIllustPrompt(state);
   if (state.mode === "proposal") return buildProposalPrompt(state);
   if (state.mode === "ui-review") return buildUiReviewPrompt(state);
+  if (state.mode === "design-direction") return buildDesignPrompt(state);
+  if (state.mode === "research") return buildResearchPrompt(state);
 
   const mode = modeLabels[state.mode];
   const role = roleMap[state.mode];
