@@ -412,6 +412,86 @@ const defaults = {
   includeSummary: true,
 };
 
+function buildWireframePrompt(state) {
+  const opt = (label, val) => (val || "").trim() ? `- ${label}：${val.trim()}` : null;
+  const pageTypeLabels = {
+    top: "トップページ", sub: "下層ページ", lp: "LP（ランディングページ）",
+    all: "全ページ", any: "おまかせ（AIが構成を提案）",
+  };
+
+  const infoLines = [
+    opt("会社名", state.wfCompany),
+    opt("業種", state.wfIndustry),
+    `- ページの種類：${pageTypeLabels[state.wfPageType] || "全ページ"}`,
+    opt("ページ名", state.wfPageName),
+    opt("目的", state.wfPagePurpose),
+  ].filter(Boolean);
+
+  const wfSectionsVal = (state.wfSections || "").trim();
+  const sectionsText = wfSectionsVal
+    ? `【セクション構成】\n${wfSectionsVal}`
+    : "セクション構成はサイトの目的・業種・ターゲットを考慮してAIが最適な構成を提案してください。";
+
+  const outputType = state.outputType === "image"
+    ? "image"
+    : "html";
+
+  const imageRules = [
+    "# 【画像出力専用ルール】",
+    "- HTMLは生成せず、PythonのPillow（PIL）を使って直接ワイヤーフレーム画像を生成してください。",
+    "- 幅1440px、高さはコンテンツ量に合わせて可変にしてください。",
+    "- 使用カラーは #000000 / #A4A4A4 / #FFFFFF / #F3F3F3 / #CCCCCC のみ。",
+    "- 写真エリアは #F3F3F3 の矩形＋中央に「IMAGE」テキストで表現。",
+    "- アイコンは #CCCCCC の正方形（基本100×100px）で表現。",
+    "- 最終的にPNG画像としてダウンロード可能な状態で出力してください。",
+    "- コードを実行して実際に画像ファイルを生成してください。",
+  ].join("\n");
+
+  const htmlRules = [
+    "# 【ワイヤーフレーム専用ルール】",
+    "## 基本設定",
+    "- 1440px幅基準。コンテンツ幅は max-width: 1120px を原則とする。",
+    "- セクション背景は白（#FFFFFF）。KV・フッターなど必要箇所のみグレー／黒を使う。",
+    "- CSSカスタムプロパティ：--black: #000000 / --gray-light: #CCCCCC / --bg-light: #F3F3F3 / --white: #FFFFFF / --border: #DDDDDD",
+    "",
+    "## セクションパターン",
+    "HEADER / KV-TOP / KV-SUB / SEC-A〜J / CTA / FOOTER から選んで組み合わせる。",
+    "",
+    "## SVGシンボル",
+    "- #pic：画像プレースホルダー（背景 #F3F3F3）",
+    "- #arrow-ne：↗矢印 / #arrow-e：→矢印",
+    "",
+    "## 出力",
+    "- <!DOCTYPE html> から始まる完成HTMLを出力する。",
+    "- 資料にない情報を推測で補った場合はHTML末尾に「推測で補った内容」として箇条書きで明記する。",
+  ].join("\n");
+
+  return [
+    "あなたは「Webサイトの情報設計と低忠実度ワイヤーフレームを作るUI設計者」です。",
+    "以下の情報をもとに、ワイヤーフレームを作成してください。",
+    "",
+    "# 【サイト情報】",
+    ...infoLines,
+    "",
+    sectionsText,
+    (state.wfNotes || "").trim() ? `\n【補足】\n${state.wfNotes.trim()}` : "",
+    (state.request || "").trim() ? `\n【背景・ひとこと】\n${state.request.trim()}` : "",
+    "",
+    "# 【デザインルール】",
+    "- フォント：Noto Sans JP（Regular〜Bold）",
+    "- フォントサイズ：4の倍数のみ・最小16px",
+    "- 余白・幅・gap：4の倍数のみ",
+    "- 使用カラー：#000000 / #A4A4A4 / #FFFFFF / #F3F3F3 / #CCCCCC のみ",
+    "- アイコン：グレーの四角（基本100×100px、小サイズは40px以上）",
+    "- 写真：#F3F3F3 背景のSVGプレースホルダー",
+    "- 実画像・実ロゴ・ブランドカラー・装飾は一切入れない",
+    "",
+    outputType === "image" ? imageRules : htmlRules,
+    "",
+    "以上の内容を確認しました。それでは今すぐ作業を開始してください。",
+  ].filter(v => v !== null && v !== undefined).join("\n");
+}
+
 function buildCustomPrompt(state) {
   const task = (state.customTask || "").trim();
   const role = (state.customRole || "").trim();
@@ -867,10 +947,11 @@ function updateIllustVisibility(mode) {
 
   // メール依頼文は背景・状況と出してほしい形を非表示
   const isEmail = mode === "email";
+  const isPolicy = mode === "policy";
   const bgRow = document.querySelector("#backgroundRow");
   const otRow = document.querySelector("#outputTypeRow");
   if (bgRow) bgRow.style.display = isEmail ? "none" : "";
-  if (otRow) otRow.style.display = isEmail ? "none" : "";
+  if (otRow) otRow.style.display = (isEmail || isPolicy) ? "none" : "";
 
   // 補足欄のラベルとplaceholderをモードに合わせて変更
   if (!hideRequest) {
@@ -975,6 +1056,7 @@ function buildPrompt(state) {
   if (state.mode === "minutes") return buildMinutesPrompt(state);
   if (state.mode === "brainstorm") return buildBrainstormPrompt(state);
   if (state.mode === "custom") return buildCustomPrompt(state);
+  if (state.mode === "wireframe") return buildWireframePrompt(state);
 
   const mode = modeLabels[state.mode];
   const role = roleMap[state.mode];
