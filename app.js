@@ -102,7 +102,7 @@ const exampleRequests = {
   brainstorm: "新サービスのネーミングアイデアを出したい",
   research: "",
   custom: "",
-  illust: "東京の下町",
+  illust: "",
 };
 
 const roleMap = {
