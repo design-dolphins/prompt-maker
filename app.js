@@ -57,6 +57,10 @@ const fields = {
   customRole: document.querySelector("#customRole"),
   customConditions: document.querySelector("#customConditions"),
   customTask: document.querySelector("#customTask"),
+  emailPurpose: document.querySelector("#emailPurpose"),
+  emailRecipient: document.querySelector("#emailRecipient"),
+  emailContent: document.querySelector("#emailContent"),
+  emailTone: document.querySelector("#emailTone"),
   policyType: document.querySelector("#policyType"),
   policyCompany: document.querySelector("#policyCompany"),
   policyIssue: document.querySelector("#policyIssue"),
@@ -515,6 +519,40 @@ function buildCustomPrompt(state) {
   ].filter(Boolean).join("\n");
 }
 
+function buildEmailPrompt(state) {
+  const opt = (label, val) => (val || "").trim() ? `- ${label}：${val.trim()}` : null;
+  const infoLines = [
+    `- メールの目的：${state.emailPurpose || "進捗報告"}`,
+    opt("相手・関係性", state.emailRecipient),
+    opt("伝えたいこと", state.emailContent),
+    `- トーン：${state.emailTone || "丁寧・フォーマル"}`,
+    opt("補足", state.request),
+  ].filter(Boolean);
+
+  return [
+    "あなたは「ビジネスコミュニケーション設計AI」です。",
+    "以下の情報をもとに、デザイナー・ディレクターが使えるビジネスメールを作成してください。",
+    "",
+    "# 【メール情報】",
+    ...infoLines,
+    "",
+    "# 【制約条件】",
+    "- 要件を先に伝える",
+    "- 長文になりすぎない（300字以内を目安）",
+    "- 件名も生成する",
+    "- 圧迫感・高圧感を避ける",
+    "- ビジネスマナーを維持する",
+    "- 誤解を生みにくい文章にする",
+    "",
+    "# 【出力形式】",
+    "1. 件名案（2〜3案）",
+    "2. メール本文（宛名・挨拶・本文・CTA・締め）",
+    "3. Slack / チャット向け短文化版（必要に応じて）",
+    "",
+    "以上の内容を確認しました。それでは今すぐ作業を開始してください。",
+  ].join("\n");
+}
+
 function buildPolicyPrompt(state) {
   const opt = (label, val) => (val || "").trim() ? `- ${label}：${val.trim()}` : null;
 
@@ -582,14 +620,17 @@ function buildBrainstormPrompt(state) {
     "- 実現可能性の低すぎる施策は除外する",
     "- KPI軸・顧客体験軸・事業戦略軸で施策を整理する",
     "- 必ず3〜5案を提示する",
-    "- 施策単体ではなく施策群としての流れも提示する",
-    "- 時間軸・予算・リソースに触れる",
+    "- 施策単体ではなく施策群のストーリーとして整理する",
+    "- 時間軸・予算・リソース・ROIイメージに触れる",
+    "- 初手でやるべき施策と後半に効く施策を時系列で整理する",
     "",
     "# 【出力形式】",
-    "- 施策案：3〜5案",
-    "- 各施策の構造化（目的 → 施策概要 → 実施ステップ → 期待効果 → KPI）",
-    "- 戦略上の優先順位",
-    "- 追加の深掘りポイント",
+    "1. 課題整理（現状のAs-Is）",
+    "2. 施策コンセプト（全体の方向性・戦略の軸）",
+    "3. 施策案一覧（3〜5案）",
+    "4. 各施策の詳細（目的 → 施策概要 → 実施ステップ → 期待効果 → KPI → コスト感）",
+    "5. 時系列の優先順位（初手でやるべき施策 / 後半に効く施策のロードマップ）",
+    "6. 追加で検討すべき論点",
     "",
     "以上の内容を確認しました。それでは今すぐ提案を開始してください。",
   ].filter(Boolean).join("\n");
@@ -680,13 +721,15 @@ function buildMinutesPrompt(state) {
     "",
     "# 【制約条件】",
     "- ラフな会話表現はビジネス文体へ整える",
+    "- 発言の意図を補完しつつ、事実ベースを維持する",
     "- 決定事項と未決事項を分離する",
+    "- 攻撃的・曖昧・責任転嫁に見える表現を避ける",
     "- ToDo・担当・期限を可能な限り整理する",
     "- 攻撃的・曖昧・責任転嫁に見える表現を避ける",
     "",
     "# 【出力形式】",
     "1. 会議概要（日時・目的）",
-    "2. 議題ごとの内容要約",
+    "2. 議題ごとの整理（議題 / 内容要約 / 補足事項）",
     "3. 決定事項",
     "4. 未決事項・確認事項",
     "5. ToDo一覧（タスク／担当／期限）",
@@ -982,10 +1025,11 @@ function updateIllustVisibility(mode) {
   const isBrainstorm = mode === "brainstorm";
   const isCustom    = mode === "custom";
   const isPolicy    = mode === "policy";
+  const isEmailMode = mode === "email";
 
   // 専用フィールドがあるモード（標準フォームを隠す）
   const hasDedicated = isIllust || isWireframe || isProposal || isUiReview ||
-                       isDesign || isResearch || isMinutes || isBrainstorm || isCustom || isPolicy;
+                       isDesign || isResearch || isMinutes || isBrainstorm || isCustom || isPolicy || isEmailMode;
 
   // 各専用fieldsetの表示制御
   document.querySelector("#fieldset-illust").style.display    = isIllust    ? "" : "none";
@@ -996,6 +1040,7 @@ function updateIllustVisibility(mode) {
   document.querySelector("#fieldset-research").style.display  = isResearch  ? "" : "none";
   document.querySelector("#fieldset-minutes").style.display   = isMinutes   ? "" : "none";
   document.querySelector("#fieldset-brainstorm").style.display = isBrainstorm ? "" : "none";
+  document.querySelector("#fieldset-email").style.display     = isEmailMode ? "" : "none";
   document.querySelector("#fieldset-policy").style.display    = isPolicy    ? "" : "none";
   document.querySelector("#fieldset-custom").style.display    = isCustom    ? "" : "none";
 
@@ -1014,12 +1059,11 @@ function updateIllustVisibility(mode) {
   document.querySelector("#researchOptionalGroup").style.display = isResearch ? "" : "none";
   document.querySelector("#brainstormOptionalGroup").style.display = isBrainstorm ? "" : "none";
 
-  // メール依頼文は背景・状況と出してほしい形を非表示
-  const isEmail = mode === "email";
+  // 背景・状況と出してほしい形はpolicyのみ非表示
   const bgRow = document.querySelector("#backgroundRow");
   const otRow = document.querySelector("#outputTypeRow");
-  if (bgRow) bgRow.style.display = (isEmail || isPolicy) ? "none" : "";
-  if (otRow) otRow.style.display = (isEmail || isPolicy) ? "none" : "";
+  if (bgRow) bgRow.style.display = isPolicy ? "none" : "";
+  if (otRow) otRow.style.display = isPolicy ? "none" : "";
 
   // 補足欄のラベルとplaceholderをモードに合わせて変更
   if (!hideRequest) {
@@ -1126,6 +1170,7 @@ function buildPrompt(state) {
   if (state.mode === "custom") return buildCustomPrompt(state);
   if (state.mode === "wireframe") return buildWireframePrompt(state);
   if (state.mode === "policy") return buildPolicyPrompt(state);
+  if (state.mode === "email") return buildEmailPrompt(state);
 
   const mode = modeLabels[state.mode];
   const role = roleMap[state.mode];
