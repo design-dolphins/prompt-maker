@@ -50,6 +50,7 @@ const fields = {
   researchTargets: document.querySelector("#researchTargets"),
   researchFocus: document.querySelector("#researchFocus"),
   minType: document.querySelector("#minType"),
+  minFormat: document.querySelector("#minFormat"),
   minWish: document.querySelector("#minWish"),
   minContent: document.querySelector("#minContent"),
   customRole: document.querySelector("#customRole"),
@@ -468,6 +469,7 @@ function buildBrainstormPrompt(state) {
 function buildMinutesPrompt(state) {
   const opt = (label, val) => (val || "").trim() ? `- ${label}：${val.trim()}` : null;
   const content = (state.minContent || "").trim();
+  const isEmail = state.minFormat === "email";
 
   const metaLines = [
     `- 会議の種類：${state.minType || "定例会"}`,
@@ -475,9 +477,60 @@ function buildMinutesPrompt(state) {
     opt("補足", state.request),
   ].filter(Boolean);
 
+  if (isEmail) {
+    return [
+      "あなたは「ビジネスコミュニケーション編集AI」です。",
+      "以下の議事メモ・文字起こしをもとに、クライアントへ送付できるメール形式の議事録メールを作成してください。",
+      "",
+      "# 【会議情報】",
+      ...metaLines,
+      "",
+      "# 【元データ】",
+      content || "（メモ・文字起こしがここに入ります）",
+      "",
+      "# 【出力形式】",
+      "以下のフォーマットに沿って出力してください。",
+      "",
+      "⚫︎⚫︎様",
+      "",
+      "お世話になっております。",
+      "⚫︎⚫︎でございます。",
+      "",
+      "本日もお時間をいただき誠にありがとうございました。",
+      "下記に、議事録とネクストアクションをご案内させていただきます。",
+      "＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿",
+      "",
+      "1. [日付]お打ち合わせ 議事録",
+      "本日のお打ち合わせの内容をご共有いたします。",
+      "▼議事録",
+      "（議事録の要点をここにまとめる）",
+      "＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿",
+      "",
+      "2. ネクストアクション",
+      "▼お客様の宿題",
+      "・（箇条書き）",
+      "—",
+      "▼弊社の宿題",
+      "・（箇条書き）",
+      "＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿",
+      "",
+      "以上になります。",
+      "ご不明点がございましたらご連絡くださいませ。",
+      "引き続き、よろしくお願いいたします。",
+      "",
+      "# 【制約条件】",
+      "- ⚫︎⚫︎などのプレースホルダーは埋めず、そのまま出力する（実名は入れない）",
+      "- 議事内容は要点を押さえて簡潔にまとめる",
+      "- ネクストアクションはお客様側と弊社側に分けて整理する",
+      "- ビジネスマナーを維持した丁寧な文体にする",
+      "",
+      "以上の内容を確認しました。それでは今すぐ作業を開始してください。",
+    ].join("\n");
+  }
+
   return [
     "あなたは「ビジネスコミュニケーション編集AI」です。",
-    "以下の議事メモ・文字起こしをもとに、クライアントへそのまま共有できる議事録へ整理してください。",
+    "以下の議事メモ・文字起こしをもとに、読みやすく整理された議事録を作成してください。",
     "",
     "# 【会議情報】",
     ...metaLines,
@@ -490,16 +543,14 @@ function buildMinutesPrompt(state) {
     "- 決定事項と未決事項を分離する",
     "- ToDo・担当・期限を可能な限り整理する",
     "- 攻撃的・曖昧・責任転嫁に見える表現を避ける",
-    "- クライアントにそのまま送れる品質にする",
     "",
     "# 【出力形式】",
-    "1. 会議概要（日時・参加者・目的）",
+    "1. 会議概要（日時・目的）",
     "2. 議題ごとの内容要約",
     "3. 決定事項",
     "4. 未決事項・確認事項",
     "5. ToDo一覧（タスク／担当／期限）",
     "6. 次回予定（あれば）",
-    "7. クライアント送付用メール文面（件名＋本文）",
     "",
     "以上の内容を確認しました。それでは今すぐ作業を開始してください。",
   ].join("\n");
