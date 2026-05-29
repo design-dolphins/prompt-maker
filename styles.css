@@ -250,8 +250,8 @@ textarea:focus {
 }
 
 .secondary-button {
-  min-height: 36px;
-  padding: 0 14px;
+  min-height: 42px;
+  padding: 0 20px;
   border-color: var(--line);
   background: #fff;
   color: var(--ink);

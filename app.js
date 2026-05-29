@@ -42,6 +42,7 @@ const fields = {
   uiPageType: document.querySelector("#uiPageType"),
   uiTarget: document.querySelector("#uiTarget"),
   uiGoal: document.querySelector("#uiGoal"),
+  uiVolume: document.querySelector("#uiVolume"),
   designTarget: document.querySelector("#designTarget"),
   designAudience: document.querySelector("#designAudience"),
   designTone: document.querySelector("#designTone"),
@@ -52,9 +53,11 @@ const fields = {
   researchTargets: document.querySelector("#researchTargets"),
   researchFocus: document.querySelector("#researchFocus"),
   minType: document.querySelector("#minType"),
+  minWish: document.querySelector("#minWish"),
   minContent: document.querySelector("#minContent"),
   minAttendees: document.querySelector("#minAttendees"),
-  minHighlight: document.querySelector("#minHighlight"),
+  customRole: document.querySelector("#customRole"),
+  customConditions: document.querySelector("#customConditions"),
   bsIssue: document.querySelector("#bsIssue"),
   bsTarget: document.querySelector("#bsTarget"),
   bsContext: document.querySelector("#bsContext"),
@@ -82,7 +85,7 @@ const modeHints = {
   wireframe: "白・グレー・黒の低忠実度ワイヤーフレームを作りたい時。HTML・画像どちらでも出力できます。",
   policy: "社内ルール、制度、運用フローを整理したい時。",
   "ui-review": "画面や導線の改善点をレビューしてほしい時。",
-  "design-direction": "デザイナーやAIに渡す制作指示を作りたい時。",
+  "design-direction": "制作チームに渡す制作指示を作りたい時。",
   email: "営業、依頼、確認、謝罪などの文章を作りたい時。",
   minutes: "議事録を読みやすく整えたい時。",
   brainstorm: "施策案、企画案、切り口を広げたい時。",
@@ -411,6 +414,20 @@ const defaults = {
   includeSummary: true,
 };
 
+function buildCustomPrompt(state) {
+  const task = (state.request || "").trim();
+  const role = (state.customRole || "").trim();
+  const conditions = (state.customConditions || "").trim();
+
+  return [
+    role ? `あなたは「${role}」です。` : null,
+    task || "（やりたいことを入力してください）",
+    conditions ? `\n# 守ってほしい条件\n${conditions}` : null,
+    "",
+    "以上の内容を確認しました。それでは今すぐ作業を開始してください。途中で質問はせず、今ある情報から最善の形で完成させてください。",
+  ].filter(Boolean).join("\n");
+}
+
 function buildBrainstormPrompt(state) {
   const opt = (label, val) => (val || "").trim() ? `- ${label}：${val.trim()}` : null;
 
@@ -457,8 +474,8 @@ function buildMinutesPrompt(state) {
 
   const metaLines = [
     `- 会議の種類：${state.minType || "定例会"}`,
+    opt("どう出してほしいか", state.minWish),
     opt("参加者", state.minAttendees),
-    opt("特に強調したいこと", state.minHighlight),
     opt("補足", state.request),
   ].filter(Boolean);
 
@@ -566,6 +583,12 @@ function buildResearchPrompt(state) {
 }
 
 function buildUiReviewPrompt(state) {
+  const volumeInstructions = {
+    brief: "各項目は要点のみ箇条書きで簡潔にまとめてください。",
+    standard: "各項目はポイントを押さえて整理してください。",
+    detail: "各項目を詳細に展開し、具体例や根拠も含めてください。",
+  };
+  const volumeInstruction = volumeInstructions[state.uiVolume] || volumeInstructions.standard;
   const perspectiveLabels = {
     overall: "UI/UX総合",
     cv: "コンバージョン改善",
@@ -588,6 +611,7 @@ function buildUiReviewPrompt(state) {
   lines.push(
     "",
     "# 出力形式",
+    `${volumeInstruction}`,
     "以下の構成でレビューしてください。",
     "1. 総評（3行程度）",
     "2. 良い点（箇条書き）",
@@ -758,8 +782,10 @@ function updateIllustVisibility(mode) {
   const isResearch = mode === "research";
   const isMinutes = mode === "minutes";
   const isBrainstorm = mode === "brainstorm";
-  const hideStandard = isIllust || isWireframe || isProposal || isUiReview || isDesign || isResearch || isMinutes || isBrainstorm;
-  document.querySelector("#fieldset-request").style.display = isIllust ? "none" : "";
+  const isCustom = mode === "custom";
+  const hideStandard = isIllust || isWireframe || isProposal || isUiReview || isDesign || isResearch || isMinutes || isBrainstorm || isCustom;
+  document.querySelector("#fieldset-request").style.display = (isIllust || isMinutes) ? "none" : "";
+  document.querySelector("#fieldset-custom").style.display = isCustom ? "" : "none";
   document.querySelector("#fieldset-brainstorm").style.display = isBrainstorm ? "" : "none";
   document.querySelector("#fieldset-minutes").style.display = isMinutes ? "" : "none";
   document.querySelector("#fieldset-design").style.display = isDesign ? "" : "none";
@@ -791,6 +817,9 @@ function updateIllustVisibility(mode) {
   } else if (isBrainstorm) {
     requestLegend.textContent = "補足・その他（任意）";
     requestTextarea.placeholder = "例：競合との差別化視点も含めてほしい";
+  } else if (isCustom) {
+    requestLegend.textContent = "やりたいこと";
+    requestTextarea.placeholder = "例：新サービスのLPコピーを考えてほしい、議事録を英語に翻訳してほしい";
   } else if (isMinutes) {
     requestLegend.textContent = "補足・その他（任意）";
     requestTextarea.placeholder = "例：箇条書き強化版で出してほしい、Slack共有用に短くしたい";
@@ -883,6 +912,7 @@ function buildPrompt(state) {
   if (state.mode === "research") return buildResearchPrompt(state);
   if (state.mode === "minutes") return buildMinutesPrompt(state);
   if (state.mode === "brainstorm") return buildBrainstormPrompt(state);
+  if (state.mode === "custom") return buildCustomPrompt(state);
 
   const mode = modeLabels[state.mode];
   const role = roleMap[state.mode];

@@ -60,15 +60,7 @@
 
               <label>
                 ブランドトーン
-                <select id="designTone" name="designTone">
-                  <option value="高級感・信頼感">高級感・信頼感</option>
-                  <option value="モダン・スタイリッシュ">モダン・スタイリッシュ</option>
-                  <option value="ミニマル・シンプル">ミニマル・シンプル</option>
-                  <option value="テック感・先進的">テック感・先進的</option>
-                  <option value="ポップ・フレンドリー">ポップ・フレンドリー</option>
-                  <option value="温かみ・親しみやすさ">温かみ・親しみやすさ</option>
-                  <option value="プロフェッショナル・堅実">プロフェッショナル・堅実</option>
-                </select>
+                <input id="designTone" name="designTone" type="text" placeholder="例：高級感・信頼感、ミニマル、ポップ、テック感、温かみ" />
               </label>
 
               <label>
@@ -79,6 +71,20 @@
               <label>
                 NG表現・避けたい方向性（任意）
                 <input id="designNg" name="designNg" type="text" placeholder="例：古くさい印象、過剰な装飾、暗い配色" />
+              </label>
+            </fieldset>
+
+            <fieldset id="fieldset-custom" style="display:none">
+              <legend>自由に作る設定</legend>
+
+              <label>
+                役割（任意）
+                <input id="customRole" name="customRole" type="text" placeholder="例：マーケターAI、Webデザイナー、採用コンサルタント" />
+              </label>
+
+              <label>
+                守ってほしい条件（任意）
+                <textarea id="customConditions" name="customConditions" rows="3" placeholder="例：箇条書きで答えてほしい、3案提示してほしい、日本語で出してほしい"></textarea>
               </label>
             </fieldset>
 
@@ -138,6 +144,11 @@
               </label>
 
               <label>
+                どう出してほしいか（任意）
+                <input id="minWish" name="minWish" type="text" placeholder="例：箇条書きを多めに、Slack共有用に短く、決定事項を目立たせて" />
+              </label>
+
+              <label>
                 議事メモ・文字起こし
                 <textarea id="minContent" name="minContent" rows="8" placeholder="ここに議事メモ、文字起こし、Slackログなどを貼り付けてください"></textarea>
               </label>
@@ -145,11 +156,6 @@
               <label>
                 参加者（任意）
                 <input id="minAttendees" name="minAttendees" type="text" placeholder="例：山田（PM）、田中（デザイナー）、クライアント鈴木様" />
-              </label>
-
-              <label>
-                特に強調したいこと（任意）
-                <input id="minHighlight" name="minHighlight" type="text" placeholder="例：決定事項を目立たせたい、次回アクションを明確に" />
               </label>
             </fieldset>
 
@@ -211,6 +217,15 @@
               <label>
                 改善したいこと（任意）
                 <textarea id="uiGoal" name="uiGoal" rows="2" placeholder="例：CVRを上げたい、離脱率を下げたい、信頼感を出したい"></textarea>
+              </label>
+
+              <label>
+                出力のボリューム
+                <select id="uiVolume" name="uiVolume">
+                  <option value="standard">標準（各項目ポイントを押さえて）</option>
+                  <option value="brief">簡潔（要点のみ）</option>
+                  <option value="detail">詳細（各項目を詳しく）</option>
+                </select>
               </label>
             </fieldset>
 
@@ -407,7 +422,7 @@
 
               <label>
                 守ってほしい条件
-                <textarea id="constraints" name="constraints" rows="3" placeholder="例: 専門用語を減らす、A4 1枚、初心者にもわかる言葉で"></textarea>
+                <textarea id="constraints" name="constraints" rows="3" placeholder="例：箇条書きで答えてほしい、3案提示してほしい、英語で出してほしい"></textarea>
               </label>
             </fieldset>
 
