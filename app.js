@@ -16,11 +16,17 @@ const fields = {
   inferMissing: document.querySelector("#inferMissing"),
   askQuestions: document.querySelector("#askQuestions"),
   includeSummary: document.querySelector("#includeSummary"),
+  illustStyle: document.querySelector("#illustStyle"),
+  illustCategory: document.querySelector("#illustCategory"),
+  illustIconSize: document.querySelector("#illustIconSize"),
+  illustIconStroke: document.querySelector("#illustIconStroke"),
   illustColors: document.querySelector("#illustColors"),
   illustBg: document.querySelector("#illustBg"),
   illustFigure: document.querySelector("#illustFigure"),
   illustFigureCount: document.querySelector("#illustFigureCount"),
   illustFraming: document.querySelector("#illustFraming"),
+  illustObjects: document.querySelector("#illustObjects"),
+  illustColorTone: document.querySelector("#illustColorTone"),
   illustTheme: document.querySelector("#illustTheme"),
   wfPageType: document.querySelector("#wfPageType"),
   wfOutputType: document.querySelector("#wfOutputType"),
@@ -880,6 +886,62 @@ function buildProposalPrompt(state) {
 function buildIllustPrompt(state) {
   const theme = (state.illustTheme || state.request || '').trim() || 'テーマを入力してください';
 
+  // アイコン
+  if (state.illustStyle === "icon") {
+    const size   = state.illustIconSize   || "24";
+    const stroke = state.illustIconStroke || "2";
+    return [
+      `[テーマ]に関連するアイコンを6〜8個、セットで作成してください。`.replace("[テーマ]", theme),
+      `スタイルは統一されたアウトラインアイコン、線の太さ${stroke}px相当で均一に。`,
+      "モノクロ（黒線・白背景）、シンプルで視認性の高いデザイン。",
+      `各アイコンのサイズは${size}px基準で統一。`,
+      "グリッド上に整列して配置。",
+    ].join("\n");
+  }
+
+  // アイソメトリック
+  if (state.illustStyle === "isometric") {
+    const colorToneMap = {
+      soft:  "Soft, bright and cheerful colors — light and approachable",
+      muted: "Muted, calm and desaturated tones — quiet and sophisticated",
+      vivid: "Bold, vivid and highly saturated colors — energetic and eye-catching",
+    };
+    const categoryMap = {
+      building: "建物・ランドマーク（店舗、施設、建築物など）",
+      item:     "小物・アイテム（食べ物、日用品、道具など）",
+      vehicle:  "乗り物・交通（電車、バス、自転車、車など）",
+      people:   "人物・キャラクター（歩く人、働く人など）",
+      nature:   "自然・植物（木、花、地形、動物など）",
+      mix:      "建物・小物・人物・乗り物など幅広くミックス",
+    };
+    const colorTone = colorToneMap[state.illustColorTone] || colorToneMap.soft;
+    const category = categoryMap[state.illustCategory] || categoryMap.mix;
+    const objects = (state.illustObjects || "").trim();
+
+    return [
+      `${theme}に関連するアイソメトリックイラストの素材集を6〜8個作成してください。`,
+      `カテゴリ：${category}`,
+      "",
+      "スタイル：",
+      "Japanese business illustration style / Pure isometric projection / Very flat appearance",
+      "No outlines / No shadows / No gradients / No textures / No lighting effects / No realistic details",
+      "面の色の塗り分けで立体感を表現（上面はやや明るく、側面は5〜10%暗め）",
+      "シンプルなジオメトリック形状、最小限の視覚情報",
+      "Clean vector artwork / Friendly and approachable / Corporate infographic style",
+      "",
+      `カラー：${colorTone} / 1素材につき2〜3色以内`,
+      "",
+      "レイアウト：",
+      "各オブジェクトを独立して配置、重ならないようにグリッド状に整列",
+      "白い背景、統一されたスケール",
+      objects ? `\n含めるオブジェクト：${objects}` : "",
+      "",
+      "Japanese stock illustration aesthetic / Flat isometric vector illustration",
+      "Extremely simplified geometry / Large color blocks / Minimalist",
+    ].filter(v => v !== null).join("\n");
+  }
+
+  // フラットベクター（既存）
   const colorInstructions = {
     "2": "高度にコントロールされた2色のみを使用",
     "3": "高度にコントロールされた3色のみを使用",
@@ -1325,6 +1387,13 @@ document.querySelector("#copyBtn").addEventListener("click", copyPrompt);
 document.querySelector("#shareBtn").addEventListener("click", shareLink);
 document.querySelector("#resetBtn").addEventListener("click", resetForm);
 fields.illustFigure.addEventListener("change", () => updateFramingVisibility(fields.illustFigure.value));
+fields.illustStyle.addEventListener("change", () => {
+  const val = fields.illustStyle.value;
+  document.querySelector("#illustFlatFields").style.display = val === "flat"      ? "" : "none";
+  document.querySelector("#illustIsoFields").style.display  = val === "isometric" ? "" : "none";
+  document.querySelector("#illustIconFields").style.display = val === "icon"      ? "" : "none";
+  updatePrompt();
+});
 fields.wfPageType.addEventListener("change", () => updateWfSectionsPlaceholder(fields.wfPageType.value));
 
 const researchThemePlaceholders = {
