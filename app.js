@@ -58,6 +58,7 @@ const fields = {
   minContent: document.querySelector("#minContent"),
   customRole: document.querySelector("#customRole"),
   customGoal: document.querySelector("#customGoal"),
+  customAudience: document.querySelector("#customAudience"),
   customBackground: document.querySelector("#customBackground"),
   customOutput: document.querySelector("#customOutput"),
   customConditions: document.querySelector("#customConditions"),
@@ -381,7 +382,7 @@ const detailInstructions = {
 };
 
 const defaults = {
-  mode: "proposal",
+  mode: "custom",
   request: "",
   background: "",
   audience: "",
@@ -1719,6 +1720,7 @@ function buildWireframePrompt(state) {
 function buildCustomPrompt(state) {
   const role       = (state.customRole       || "").trim();
   const goal       = (state.customGoal       || "").trim();
+  const audience   = (state.customAudience   || "").trim();
   const background = (state.customBackground || "").trim();
   const output     = (state.customOutput     || "").trim();
   const conditions = (state.customConditions || "").trim();
@@ -1727,9 +1729,10 @@ function buildCustomPrompt(state) {
     role ? `あなたは「${role}」です。` : null,
     "",
     `# 目的\n${goal || "（目的を入力してください）"}`,
+    audience   ? `\n# 対象レベル\n${audience}`   : null,
     background ? `\n# 背景・状況\n${background}` : null,
-    output     ? `\n# 出力形式\n${output}`     : null,
-    conditions ? `\n# 条件・制約\n${conditions}` : null,
+    output     ? `\n# 出力形式\n${output}`        : null,
+    conditions ? `\n# 条件・制約\n${conditions}`  : null,
     "",
     "以上の内容を確認しました。それでは今すぐ作業を開始してください。途中で質問はせず、今ある情報から最善の形で完成させてください。",
   ].filter(v => v !== null).join("\n");

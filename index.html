@@ -29,6 +29,7 @@
               <label>
                 作りたいもの
                 <select id="mode" name="mode">
+                  <option value="custom">自由に作る</option>
                   <option value="brainstorm">アイデア出し</option>
                   <option value="research">リサーチ・競合分析</option>
                   <option value="proposal">企画書・提案書</option>
@@ -38,7 +39,6 @@
                   <option value="illust">イラスト生成</option>
                   <option value="minutes">議事録・要約リライト</option>
                   <option value="email">メール・依頼文</option>
-                  <option value="custom">自由に作る</option>
                 </select>
                 <small class="field-hint" id="modeHint"></small>
               </label>
@@ -101,13 +101,18 @@
               </label>
 
               <label>
+                対象レベル（任意）
+                <input id="customAudience" name="customAudience" type="text" placeholder="例：小学生でもわかるように、初心者向け、経営層向け" />
+              </label>
+
+              <label>
                 背景・状況（任意）
                 <textarea id="customBackground" name="customBackground" rows="3" placeholder="例：30代前半、エンジニア歴5年、マネジメント経験なし"></textarea>
               </label>
 
               <label>
                 出力形式（任意）
-                <input id="customOutput" name="customOutput" type="text" placeholder="例：箇条書き、表形式、3案で（空欄でおまかせ）" />
+                <input id="customOutput" name="customOutput" type="text" placeholder="例：箇条書き、表形式、3案で" />
               </label>
 
               <label>
