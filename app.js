@@ -920,11 +920,13 @@ function buildIllustPrompt(state) {
     const objects = (state.illustObjects || "").trim();
     const isPeople = state.illustCategory === "people";
 
+    const isBuilding = state.illustCategory === "building";
     const directionMap = {
-      left:  "All objects / figures facing left-forward direction",
-      right: "All objects / figures facing right-forward direction",
-      back:  state.illustCategory === "building" ? null : "All objects / figures facing away from the viewer — rear-facing",
-      mix:   null,
+      left:       "All objects / figures facing left-forward direction",
+      right:      "All objects / figures facing right-forward direction",
+      "back-left":  isBuilding ? null : "All objects / figures facing away from the viewer, turned toward the left",
+      "back-right": isBuilding ? null : "All objects / figures facing away from the viewer, turned toward the right",
+      mix:        null,
     };
     const directionText = directionMap[state.illustDirection] || null;
 
