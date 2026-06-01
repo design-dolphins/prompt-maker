@@ -57,8 +57,10 @@ const fields = {
   minWish: document.querySelector("#minWish"),
   minContent: document.querySelector("#minContent"),
   customRole: document.querySelector("#customRole"),
+  customGoal: document.querySelector("#customGoal"),
+  customBackground: document.querySelector("#customBackground"),
+  customOutput: document.querySelector("#customOutput"),
   customConditions: document.querySelector("#customConditions"),
-  customTask: document.querySelector("#customTask"),
   emailRecipient: document.querySelector("#emailRecipient"),
   emailContent: document.querySelector("#emailContent"),
   emailTone: document.querySelector("#emailTone"),
@@ -1715,17 +1717,22 @@ function buildWireframePrompt(state) {
 }
 
 function buildCustomPrompt(state) {
-  const task = (state.customTask || "").trim();
-  const role = (state.customRole || "").trim();
+  const role       = (state.customRole       || "").trim();
+  const goal       = (state.customGoal       || "").trim();
+  const background = (state.customBackground || "").trim();
+  const output     = (state.customOutput     || "").trim();
   const conditions = (state.customConditions || "").trim();
 
   return [
     role ? `あなたは「${role}」です。` : null,
-    task || "（やりたいことを入力してください）",
-    conditions ? `\n# 守ってほしい条件\n${conditions}` : null,
+    "",
+    `# 目的\n${goal || "（目的を入力してください）"}`,
+    background ? `\n# 背景・状況\n${background}` : null,
+    output     ? `\n# 出力形式\n${output}`     : null,
+    conditions ? `\n# 条件・制約\n${conditions}` : null,
     "",
     "以上の内容を確認しました。それでは今すぐ作業を開始してください。途中で質問はせず、今ある情報から最善の形で完成させてください。",
-  ].filter(Boolean).join("\n");
+  ].filter(v => v !== null).join("\n");
 }
 
 function buildEmailPrompt(state) {

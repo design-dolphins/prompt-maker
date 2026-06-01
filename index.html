@@ -91,19 +91,28 @@
               <legend>自由に作る設定</legend>
 
               <label>
-                やりたいこと
-                <textarea id="customTask" name="customTask" rows="4" placeholder="例：新サービスのLPコピーを考えてほしい、議事録を英語に翻訳してほしい"></textarea>
-              </label>
-
-
-              <label>
-                役割（任意）
-                <input id="customRole" name="customRole" type="text" placeholder="例：マーケターAI、Webデザイナー、採用コンサルタント" />
+                AIの役割
+                <input id="customRole" name="customRole" type="text" placeholder="例：マーケター、Webデザイナー、採用コンサルタント、税理士" />
               </label>
 
               <label>
-                守ってほしい条件（任意）
-                <textarea id="customConditions" name="customConditions" rows="3" placeholder="例：箇条書きで答えてほしい、3案提示してほしい、日本語で出してほしい"></textarea>
+                目的
+                <textarea id="customGoal" name="customGoal" rows="3" placeholder="例：ITエンジニアからPMへの転職に必要なスキルを知りたい"></textarea>
+              </label>
+
+              <label>
+                背景・状況（任意）
+                <textarea id="customBackground" name="customBackground" rows="3" placeholder="例：30代前半、エンジニア歴5年、マネジメント経験なし"></textarea>
+              </label>
+
+              <label>
+                出力形式（任意）
+                <input id="customOutput" name="customOutput" type="text" placeholder="例：箇条書き、表形式、3案で（空欄でおまかせ）" />
+              </label>
+
+              <label>
+                条件・制約（任意）
+                <textarea id="customConditions" name="customConditions" rows="3" placeholder="例：有料サービスは除外、専門用語を使わない、日本語で答えて"></textarea>
               </label>
             </fieldset>
 
