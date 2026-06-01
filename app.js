@@ -394,6 +394,12 @@ const defaults = {
   inferMissing: true,
   askQuestions: false,
   includeSummary: true,
+  customRole: "",
+  customGoal: "",
+  customAudience: "",
+  customBackground: "",
+  customOutput: "",
+  customConditions: "",
 };
 
 function buildWireframePrompt(state) {
