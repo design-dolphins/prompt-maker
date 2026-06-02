@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
-    <title>Prompt Maker</title>
+    <title>Prompt Studio</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
@@ -12,7 +12,7 @@
       <section class="workspace" aria-label="プロンプトメーカー">
         <header class="topbar">
           <div>
-            <p class="eyebrow">Prompt Maker</p>
+            <p class="eyebrow">Prompt Studio</p>
             <h1>やりたいことを選んで、コピペ用プロンプトを作る</h1>
             <p class="lead-text">作りたいものを選んで、ラフな相談を書くだけ。別チャットへ貼れるプロンプトができます。</p>
           </div>
@@ -118,25 +118,29 @@
                 <textarea id="customGoal" name="customGoal" rows="3" placeholder="例：クライアントに制作費の値上げを納得してもらいたい、サイトのキャッチコピーを3案考えたい"></textarea>
               </label>
 
-              <label>
-                対象レベル（任意）
-                <input id="customAudience" name="customAudience" type="text" placeholder="例：小学生でもわかるように、初心者向け、経営層向け" />
-              </label>
+              <div id="customOptionalGroup">
+                <p class="optional-section-label">任意</p>
 
-              <label>
-                背景・状況（任意）
-                <textarea id="customBackground" name="customBackground" rows="3" placeholder="例：BtoB企業のコーポレートサイトリニューアル、予算100万円・納期2ヶ月"></textarea>
-              </label>
+                <label>
+                  対象レベル
+                  <input id="customAudience" name="customAudience" type="text" placeholder="例：小学生でもわかるように、初心者向け、経営層向け" />
+                </label>
 
-              <label>
-                出力形式（任意）
-                <input id="customOutput" name="customOutput" type="text" placeholder="例：箇条書き、表形式、3案で" />
-              </label>
+                <label>
+                  背景・状況
+                  <textarea id="customBackground" name="customBackground" rows="3" placeholder="例：BtoB企業のコーポレートサイトリニューアル、予算100万円・納期2ヶ月"></textarea>
+                </label>
 
-              <label>
-                条件・制約（任意）
-                <textarea id="customConditions" name="customConditions" rows="3" placeholder="例：専門用語を使わない、クライアントが承認しやすい表現で"></textarea>
-              </label>
+                <label>
+                  出力形式
+                  <input id="customOutput" name="customOutput" type="text" placeholder="例：箇条書き、表形式、3案で" />
+                </label>
+
+                <label>
+                  条件・制約
+                  <textarea id="customConditions" name="customConditions" rows="3" placeholder="例：専門用語を使わない、クライアントが承認しやすい表現で"></textarea>
+                </label>
+              </div>
             </fieldset>
 
             <fieldset id="fieldset-brainstorm" style="display:none">
@@ -162,6 +166,29 @@
                 <input id="bsGoal" name="bsGoal" type="text" placeholder="例：売上UP、認知拡大、CV向上、採用強化、UI改善" />
               </label>
 
+              <div id="brainstormOptionalGroup">
+                <p class="optional-section-label">任意</p>
+
+                <label>
+                  施策のトーン
+                  <select id="bsTone" name="bsTone">
+                    <option value="バランス重視">バランス重視</option>
+                    <option value="攻め・革新的">攻め・革新的</option>
+                    <option value="守り・保守的">守り・保守的</option>
+                    <option value="低コスト優先">低コスト優先</option>
+                    <option value="スピード優先">スピード優先</option>
+                  </select>
+                </label>
+                <label>
+                  参考情報・素材
+                  <textarea id="bsMaterials" name="bsMaterials" rows="3" placeholder="例：既存施策一覧、競合情報、ターゲット情報、予算感、USP"></textarea>
+                </label>
+                <label>
+                  補足・その他
+                  <textarea id="bsNotes" name="bsNotes" rows="2" placeholder="例：過去に試した施策、外せない制約、社内の方針"></textarea>
+                </label>
+              </div>
+
             </fieldset>
 
             <fieldset id="fieldset-minutes" style="display:none">
@@ -181,10 +208,14 @@
                 <textarea id="minContent" name="minContent" rows="8" placeholder="ここに議事メモ、文字起こし、Slackログなどを貼り付けてください"></textarea>
               </label>
 
-              <label>
-                どう出してほしいか（任意）
+              <div id="minutesOptionalGroup">
+                <p class="optional-section-label">任意</p>
+
+                <label>
+                  どう出してほしいか
                 <input id="minWish" name="minWish" type="text" placeholder="例：箇条書きを多めに、Slack共有用に短く、決定事項を目立たせて" />
-              </label>
+                </label>
+              </div>
             </fieldset>
 
             <fieldset id="fieldset-sitedesign" style="display:none">
@@ -401,8 +432,11 @@
                 <textarea id="wfMaterials" name="wfMaterials" rows="6" placeholder="企画書・議事録・要件メモ・構成案などをそのまま貼り付けてください。この内容をもとにテキストやセクション構成を考えます。"></textarea>
               </label>
 
-              <label>
-                サイト設計の結果（任意）
+              <div id="wireframeOptionalGroup">
+                <p class="optional-section-label">任意</p>
+
+                <label>
+                  サイト設計の結果
                 <textarea id="wfSiteDesign" name="wfSiteDesign" rows="4" placeholder="サイト設計モードの結果をそのまま貼り付けてください。ページ構成・導線をワイヤーに反映します。"></textarea>
               </label>
             </fieldset>
@@ -592,22 +626,6 @@
                 </label>
               </div>
 
-              <div id="brainstormOptionalGroup" style="display:none">
-                <label>
-                  施策のトーン
-                  <select id="bsTone" name="bsTone">
-                    <option value="バランス重視">バランス重視</option>
-                    <option value="攻め・革新的">攻め・革新的</option>
-                    <option value="守り・保守的">守り・保守的</option>
-                    <option value="低コスト優先">低コスト優先</option>
-                    <option value="スピード優先">スピード優先</option>
-                  </select>
-                </label>
-                <label>
-                  参考情報・素材
-                  <textarea id="bsMaterials" name="bsMaterials" rows="3" placeholder="例：既存施策一覧、競合情報、ターゲット情報、予算感、USP"></textarea>
-                </label>
-              </div>
 
               <legend id="requestLegend">任意</legend>
               <label id="requestLabel">
@@ -743,7 +761,7 @@
 
     <footer class="site-footer">
       <div class="site-footer-inner">
-        <span>© 2026 Prompt Maker</span>
+        <span>© 2026 Prompt Studio</span>
         <nav class="footer-links">
           <a href="./disclaimer.html" target="_blank">免責事項</a>
           <a href="./privacy.html" target="_blank">プライバシーポリシー</a>
