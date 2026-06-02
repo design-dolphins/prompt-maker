@@ -185,11 +185,6 @@
               <legend>競合分析設定</legend>
 
               <label>
-                調査対象のサイトURL（任意）
-                <input id="compOwnUrl" name="compOwnUrl" type="text" placeholder="例：https://example.com（なければAIが調査）" />
-              </label>
-
-              <label>
                 サービス・事業内容
                 <textarea id="compService" name="compService" rows="3" placeholder="例：中小企業向けのWeb制作会社。コーポレートサイトやECサイトの制作を中心に行っている"></textarea>
               </label>
@@ -201,6 +196,11 @@
 
               <div id="compOptionalGroup">
                 <p class="optional-section-label">任意</p>
+
+                <label>
+                  調査対象のサイトURL
+                  <input id="compOwnUrl" name="compOwnUrl" type="text" placeholder="例：https://example.com" />
+                </label>
 
                 <label>
                   競合サイトURL
