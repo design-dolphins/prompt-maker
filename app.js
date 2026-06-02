@@ -1265,7 +1265,7 @@ function showToast(message) {
 
 function getState() {
   return Object.fromEntries(
-    Object.entries(fields).map(([key, field]) => [key, field.type === "checkbox" ? field.checked : field.value.trim()]),
+    Object.entries(fields).map(([key, field]) => [key, field ? (field.type === "checkbox" ? field.checked : field.value.trim()) : ""]),
   );
 }
 
