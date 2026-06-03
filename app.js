@@ -927,6 +927,7 @@ function buildSeoPrompt(state) {
 }
 
 
+function buildCompetitorPrompt(state) {
   const opt = (label, val) => (val || "").trim() ? `- ${label}：${val.trim()}` : null;
   const infoLines = [
     opt("サービス・事業内容", state.compService),
