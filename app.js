@@ -96,6 +96,12 @@ const fields = {
   bsMaterials: document.querySelector("#bsMaterials"),
   bsNotes: document.querySelector("#bsNotes"),
   minNextMtg: document.querySelector("#minNextMtg"),
+  taskRole: document.querySelector("#taskRole"),
+  taskSituation: document.querySelector("#taskSituation"),
+  taskType: document.querySelector("#taskType"),
+  taskConcern: document.querySelector("#taskConcern"),
+  taskDeadline: document.querySelector("#taskDeadline"),
+  taskNotes: document.querySelector("#taskNotes"),
   seoType: document.querySelector("#seoType"),
   seoUrl: document.querySelector("#seoUrl"),
   seoSiteName: document.querySelector("#seoSiteName"),
@@ -124,6 +130,7 @@ const modeLabels = {
   brainstorm: "アイデア出し",
   sitedesign: "サイト設計",
   seo: "サイトマップ・メタ情報設計",
+  task: "やること整理",
   competitor: "競合分析",
   research: "リサーチ・競合分析",
   custom: "自由に作る",
@@ -141,6 +148,7 @@ const modeHints = {
   brainstorm: "施策案、企画案、切り口を広げたい時。",
   sitedesign: "サイトの構成・導線・提案をまとめたい時。",
   seo: "URL・メタタイトル・ディスクリプションをページごとに設計したい時。",
+  task: "やること・確認事項・依頼先が整理できていない時。",
   competitor: "競合サイトを分析して、差別化戦略と打ち出し方を考えたい時。",
   research: "競合、顧客、業界、参考事例を整理したい時。",
   custom: "上にない用途を自由に作りたい時。",
@@ -158,6 +166,7 @@ const exampleRequests = {
   brainstorm: "",
   sitedesign: "",
   seo: "",
+  task: "",
   competitor: "",
   research: "",
   custom: "",
@@ -175,6 +184,7 @@ const roleMap = {
   brainstorm: "戦略プランナー兼アイデアクリエイターAI",
   sitedesign: "Webディレクター兼サイト設計AI",
   seo: "SEOコンサルタント兼Webディレクター",
+  task: "Webプロジェクト整理AI",
   competitor: "Web戦略コンサルタント兼競合分析AI",
   research: "市場分析コンサルタント兼リサーチAI",
   custom: "プロンプトエンジニア兼専門領域支援AI",
@@ -927,6 +937,64 @@ function buildSeoPrompt(state) {
 }
 
 
+function buildTaskPrompt(state) {
+  const roleLabels = {
+    "director":          "ディレクター",
+    "designer":          "デザイナー",
+    "director-designer": "ディレクター兼デザイナー",
+    "coder":             "コーダー",
+  };
+  const sectionsByRole = {
+    "director":          ["クライアントへの確認事項", "コーダーへの依頼・確認事項", "インフラ担当への確認事項", "QAへの依頼事項", "自分のネクストアクション"],
+    "designer":          ["クライアントへの確認事項", "ディレクターへの確認・報告事項", "コーダーへの引き渡し確認", "自分のネクストアクション"],
+    "director-designer": ["クライアントへの確認事項", "コーダーへの依頼・確認事項", "インフラ担当への確認事項", "QAへの依頼事項", "自分のネクストアクション"],
+    "coder":             ["ディレクターへの確認事項", "デザイナーへの確認事項", "インフラ担当への確認事項", "QAへの連携事項", "自分のネクストアクション"],
+  };
+  const role      = state.taskRole || "director";
+  const roleLabel = roleLabels[role] || "ディレクター";
+  const sections  = sectionsByRole[role] || sectionsByRole["director"];
+  const situation = (state.taskSituation || "").trim();
+  const type      = (state.taskType      || "").trim();
+  const concern   = (state.taskConcern   || "").trim();
+  const deadline  = (state.taskDeadline  || "").trim();
+  const notes     = (state.taskNotes     || "").trim();
+
+  const infoLines = [
+    `- 役割：${roleLabel}`,
+    type     ? `- プロジェクトの種類：${type}`   : null,
+    deadline ? `- 納期・フェーズ：${deadline}`   : null,
+    notes    ? `- 補足：${notes}`                : null,
+  ].filter(Boolean);
+
+  const sectionsText = sections.map(s => `- ${s}`).join("\n");
+
+  return [
+    "あなたは「Webプロジェクト整理AI」です。",
+    `以下の情報をもとに、${roleLabel}として今すぐやるべきことを関係者別に整理してください。`,
+    "各項目には、実際に使える例文・聞き方のサンプルも添えてください。",
+    "",
+    "# 【プロジェクト情報】",
+    ...infoLines,
+    "",
+    "# 【現状・状況】",
+    situation || "（状況説明がここに入ります）",
+    concern ? `\n# 【気になっていること】\n${concern}` : null,
+    "",
+    "# 【出力形式】",
+    "以下のセクションごとに確認・依頼すべき内容を箇条書きで出してください。",
+    "各項目には「→ 例：〇〇」の形で、実際に使える一言・聞き方のサンプルを添えてください。",
+    sectionsText,
+    "",
+    "# 【制約条件】",
+    "- 状況から読み取れる内容だけを出す（架空の問題を作らない）",
+    "- 誰に何を確認すべきか不明な場合は、それも整理して出す",
+    "- ネクストアクションは優先順位順に並べる",
+    "- 例文は堅すぎず、実務で使える自然な言葉にする",
+    "",
+    "以上を確認しました。それでは今すぐ作業を開始してください。",
+  ].filter(v => v !== null).join("\n");
+}
+
 function buildCompetitorPrompt(state) {
   const opt = (label, val) => (val || "").trim() ? `- ${label}：${val.trim()}` : null;
   const infoLines = [
@@ -1443,6 +1511,7 @@ function updateIllustVisibility(mode) {
   const isDesign    = mode === "design-direction";
   const isSiteDesign = mode === "sitedesign";
   const isSeo       = mode === "seo";
+  const isTask       = mode === "task";
   const isCompetitor = mode === "competitor";
   const isResearch  = mode === "research";
   const isMinutes   = mode === "minutes";
@@ -1453,7 +1522,7 @@ function updateIllustVisibility(mode) {
 
   // 専用フィールドがあるモード（標準フォームを隠す）
   const hasDedicated = isIllust || isWireframe || isProposal || isUiReview ||
-                       isDesign || isResearch || isCompetitor || isSiteDesign || isSeo || isMinutes || isBrainstorm || isCustom || isEmailMode || isConvert;
+                       isDesign || isResearch || isTask || isTask || isCompetitor || isSiteDesign || isSeo || isMinutes || isBrainstorm || isCustom || isEmailMode || isConvert;
 
   // 各専用fieldsetの表示制御
   document.querySelector("#fieldset-illust").style.display    = isIllust    ? "" : "none";
@@ -1463,6 +1532,7 @@ function updateIllustVisibility(mode) {
   document.querySelector("#fieldset-design").style.display    = isDesign    ? "" : "none";
   document.querySelector("#fieldset-sitedesign").style.display = isSiteDesign ? "" : "none";
   document.querySelector("#fieldset-seo").style.display        = isSeo        ? "" : "none";
+  document.querySelector("#fieldset-task").style.display       = isTask       ? "" : "none";
   document.querySelector("#fieldset-competitor").style.display = isCompetitor ? "" : "none";
   document.querySelector("#fieldset-research").style.display  = isResearch  ? "" : "none";
   if (isResearch) {
@@ -1482,7 +1552,7 @@ function updateIllustVisibility(mode) {
   document.querySelector("#fieldset-finish").style.display  = hasDedicated ? "none" : "";
 
   // 補足欄: illust/minutes/customは非表示、他の専用モードは表示（下部に）
-  const hideRequest = isIllust || isMinutes || isCustom || isCompetitor || isSiteDesign || isSeo || isBrainstorm || isWireframe || isDesign || isUiReview || isConvert;
+  const hideRequest = isIllust || isMinutes || isCustom || isTask || isCompetitor || isSiteDesign || isSeo || isBrainstorm || isWireframe || isDesign || isUiReview || isConvert;
   document.querySelector("#fieldset-request").style.display = hideRequest ? "none" : "";
   document.querySelector("#designOptionalGroup").style.display = isDesign ? "" : "none";
   document.querySelector("#researchOptionalGroup").style.display = isResearch ? "" : "none";
@@ -1597,6 +1667,7 @@ function buildPrompt(state) {
   if (state.mode === "design-direction") return buildDesignPrompt(state);
   if (state.mode === "sitedesign") return buildSiteDesignPrompt(state);
   if (state.mode === "seo") return buildSeoPrompt(state);
+  if (state.mode === "task") return buildTaskPrompt(state);
   if (state.mode === "competitor") return buildCompetitorPrompt(state);
   if (state.mode === "research") return buildResearchPrompt(state);
   if (state.mode === "minutes") return buildMinutesPrompt(state);
